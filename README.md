@@ -70,8 +70,8 @@ That keeps pins free and is a great lesson in how I²C addresses work.
 We'll build in small wins so Valentin sees progress every session:
 
 - [x] **1. Blink** — ✅ board boots & uploads, "Hello from VURP!" on Serial. (LED wiring next session.)
-- [ ] **2. Light up** — control the NeoPixel LED ring (colors, animations).
-- [ ] **3. WiFi page** — ESP32 serves a web page; a button on the phone turns the ring on/off.
+- [x] **2. Light up** — ✅ NeoPixel ring runs a rotating rainbow (powered from 3V3, data on D2).
+- [ ] **3. WiFi page** — ESP32 serves a web page; a button on the phone turns the ring on/off. 👉 **next (Fri Jun 5)**
 - [ ] **4. One motor** — wire up the motor driver, spin one tread forward/back.
 - [ ] **5. Two motors** — both treads; drive forward, back, and turn.
 - [ ] **6. Joystick** — web page joystick → smooth driving from the phone.
@@ -93,9 +93,11 @@ We'll build in small wins so Valentin sees progress every session:
 - ℹ️ **Note:** the XIAO ESP32-C3 has **no user-programmable onboard LED** (unlike
   most XIAO boards) — so "Blink" uses an **external LED** on a breadboard.
 
+- ✅ **Chassis:** confirmed — tracked chassis with 2 DC motors on hand.
+- ✅ **FeatherWing wired:** the ~4 connection wires to the XIAO are soldered.
+
 ## Decisions still open
 
-- [ ] **Chassis:** confirm we have a tracked chassis with 2 DC motors.
 - [ ] **Power:** how we power logic vs. motors (two separate supplies).
 
 ---
@@ -109,3 +111,7 @@ We'll build in small wins so Valentin sees progress every session:
   "Hello from VURP!" on the Serial Monitor. The C3 wasn't detected at first; fixed
   by forcing USB download mode (**hold B, tap R, release B**) — good trick to
   remember if the port ever vanishes. LED wiring still to do.
+- **2026-06-03** — ✅ **Milestone 1 done** (LED blinks) and ✅ **Milestone 2 done**
+  (NeoPixel rainbow, powered from 3V3, data on D2). Confirmed we have the tracked
+  chassis and the Motor FeatherWing wires are soldered. **Next session: Friday
+  Jun 5 — Milestone 3 (WiFi control page).**
