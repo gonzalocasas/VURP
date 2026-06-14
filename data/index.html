@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VURP Controls</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101820;
+      color: #f6f3e8;
+    }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+    }
+    main {
+      width: min(34rem, calc(100vw - 2rem));
+      padding: 1.5rem 0;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(2.25rem, 12vw, 4.5rem);
+      letter-spacing: 0;
+    }
+    h2 {
+      margin: 2rem 0 0.75rem;
+      font-size: 1.25rem;
+      letter-spacing: 0;
+    }
+    p {
+      margin: 0 0 1rem;
+      color: #c9d7d6;
+      font-size: 1rem;
+    }
+    .status {
+      display: inline-grid;
+      place-items: center;
+      min-width: 6rem;
+      min-height: 2.5rem;
+      margin: 0.25rem 0 1rem;
+      border: 2px solid #456268;
+      border-radius: 0.5rem;
+      color: #f7d65a;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .ring-switch {
+      display: inline-grid;
+      place-items: center;
+      width: min(12rem, 58vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 0;
+      background: #e84a5f;
+      color: #fff;
+      font-size: clamp(1.4rem, 7vw, 2.2rem);
+      font-weight: 900;
+      box-shadow: 0 0.65rem 0 #9d2f3f;
+    }
+    .ring-switch[data-on="true"] {
+      background: #2f9c95;
+      box-shadow: 0 0.65rem 0 #1e625e;
+    }
+    .ring-switch:active,
+    button:active {
+      transform: translateY(0.3rem);
+    }
+    .joystick {
+      position: relative;
+      width: min(18rem, 80vw);
+      aspect-ratio: 1;
+      margin: 1rem auto 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #1b2c33 0 38%, transparent 39%),
+        #15222a;
+      border: 3px solid #456268;
+      touch-action: none;          /* let us drag without the page scrolling */
+      user-select: none;
+    }
+    .joystick .knob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 38%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: #f7d65a;
+      box-shadow: 0 0.45rem 0 #b58e24;
+      transform: translate(-50%, -50%);
+      transition: transform 0.08s ease-out;
+      pointer-events: none;        /* the base handles all the pointer events */
+    }
+    .joystick[data-active="true"] .knob {
+      background: #2f9c95;
+      box-shadow: 0 0.45rem 0 #1e625e;
+      transition: none;            /* follow the finger instantly while driving */
+    }
+    .motor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .speed-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    button {
+      min-height: 4rem;
+      border: 0;
+      border-radius: 0.5rem;
+      background: #f7d65a;
+      color: #18272f;
+      font-size: 1rem;
+      font-weight: 900;
+      box-shadow: 0 0.35rem 0 #b58e24;
+    }
+    .stop {
+      background: #e84a5f;
+      color: #fff;
+      box-shadow: 0 0.35rem 0 #9d2f3f;
+    }
+    .speed {
+      min-height: 3rem;
+      background: #456268;
+      color: #fff;
+      box-shadow: 0 0.35rem 0 #283c42;
+    }
+    .speed[data-active="true"] {
+      background: #2f9c95;
+      box-shadow: 0 0.35rem 0 #1e625e;
+    }
+    button:disabled {
+      opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>VURP</h1>
+
+    <h2>LED ring</h2>
+    <div id="ring-status" class="status">...</div>
+    <button id="ring-button" class="ring-switch" type="button">...</button>
+
+    <h2>Drive</h2>
+    <p id="motor-status">...</p>
+    <div id="speed-status" class="status">...</div>
+    <div class="speed-grid">
+      <button class="speed" data-speed="160" type="button">Low</button>
+      <button class="speed" data-speed="210" type="button">Med</button>
+      <button class="speed" data-speed="255" type="button">Max</button>
+    </div>
+    <p>Drag to drive — let go to stop.</p>
+    <div id="joystick" class="joystick">
+      <div class="knob"></div>
+    </div>
+
+    <h2>Motor M3 test</h2>
+    <div class="motor-grid">
+      <button data-motor-cmd="m3_reverse" type="button">Reverse</button>
+      <button class="stop" data-motor-cmd="stop" type="button">Stop</button>
+      <button data-motor-cmd="m3_forward" type="button">Forward</button>
+    </div>
+
+    <h2>Motor M4 test</h2>
+    <div class="motor-grid">
+      <button data-motor-cmd="m4_reverse" type="button">Reverse</button>
+      <button class="stop" data-motor-cmd="stop" type="button">Stop</button>
+      <button data-motor-cmd="m4_forward" type="button">Forward</button>
+    </div>
+  </main>
+
+  <script>
+    const ringStatus = document.querySelector("#ring-status");
+    const ringButton = document.querySelector("#ring-button");
+    const motorStatus = document.querySelector("#motor-status");
+    const speedStatus = document.querySelector("#speed-status");
+    const motorButtons = [...document.querySelectorAll("[data-motor-cmd]")];
+    const speedButtons = [...document.querySelectorAll("[data-speed]")];
+    let lastStatus = null;
+
+    async function postJson(url, body) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      return response.json();
+    }
+
+    function renderStatus(status) {
+      lastStatus = status;
+      const ringLabel = status.ringOn ? "ON" : "OFF";
+      ringStatus.textContent = ringLabel;
+      ringButton.textContent = ringLabel;
+      ringButton.dataset.on = String(status.ringOn);
+      motorStatus.textContent = status.motorStatus;
+      speedStatus.textContent = `speed ${status.motorSpeed}`;
+      motorButtons.forEach((button) => {
+        button.disabled = !status.motorDriverFound && button.dataset.motorCmd !== "stop";
+      });
+      speedButtons.forEach((button) => {
+        button.dataset.active = String(Number(button.dataset.speed) === status.motorSpeed);
+      });
+    }
+
+    async function refreshStatus() {
+      const response = await fetch("/api/status");
+      renderStatus(await response.json());
+    }
+
+    ringButton.addEventListener("click", async () => {
+      ringButton.disabled = true;
+      try {
+        const nextRingState = ringButton.dataset.on !== "true";
+        renderStatus(await postJson("/api/ring", { on: nextRingState }));
+      } finally {
+        ringButton.disabled = false;
+      }
+    });
+
+    motorButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        motorButtons.forEach((item) => { item.disabled = true; });
+        try {
+          renderStatus(await postJson("/api/motor", { cmd: button.dataset.motorCmd }));
+        } finally {
+          if (lastStatus) {
+            renderStatus(lastStatus);
+          }
+        }
+      });
+    });
+
+    speedButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        speedButtons.forEach((item) => { item.disabled = true; });
+        try {
+          renderStatus(await postJson("/api/speed", { speed: Number(button.dataset.speed) }));
+        } finally {
+          speedButtons.forEach((item) => { item.disabled = false; });
+        }
+      });
+    });
+
+    // --- Joystick: drag to drive, let go to stop ---
+    const joystick = document.querySelector("#joystick");
+    const knob = joystick.querySelector(".knob");
+    let drive = { x: 0, y: 0 };   // latest joystick vector, -100..100 each
+    let driving = false;
+    let driveBusy = false;        // don't pile up overlapping /api/drive requests
+
+    function moveKnob(fractionX, fractionY) {
+      // 31% of the base radius keeps the knob inside the ring at full tilt.
+      knob.style.transform =
+        `translate(calc(-50% + ${fractionX * 31}%), calc(-50% + ${fractionY * 31}%))`;
+    }
+
+    function updateFromPointer(event) {
+      const rect = joystick.getBoundingClientRect();
+      const radius = rect.width / 2;
+      let dx = (event.clientX - (rect.left + radius)) / radius;
+      let dy = (event.clientY - (rect.top + radius)) / radius;
+
+      // Clamp the knob to the edge of the circle.
+      const distance = Math.hypot(dx, dy);
+      if (distance > 1) {
+        dx /= distance;
+        dy /= distance;
+      }
+
+      moveKnob(dx, dy);
+      // Screen y grows downward, so flip it: pushing up = drive forward.
+      drive = { x: Math.round(dx * 100), y: Math.round(-dy * 100) };
+    }
+
+    function recenterKnob() {
+      drive = { x: 0, y: 0 };
+      knob.style.transform = "translate(-50%, -50%)";
+    }
+
+    async function sendDrive() {
+      if (driveBusy) {
+        return;
+      }
+      driveBusy = true;
+      try {
+        renderStatus(await postJson("/api/drive", drive));
+      } catch (error) {
+        // A dropped packet is fine — the watchdog stops the rover, and the next
+        // tick will resend the current stick position.
+      } finally {
+        driveBusy = false;
+      }
+    }
+
+    joystick.addEventListener("pointerdown", (event) => {
+      driving = true;
+      joystick.dataset.active = "true";
+      joystick.setPointerCapture(event.pointerId);
+      updateFromPointer(event);
+      sendDrive();
+    });
+
+    joystick.addEventListener("pointermove", (event) => {
+      if (driving) {
+        updateFromPointer(event);
+      }
+    });
+
+    function endDrive() {
+      if (!driving) {
+        return;
+      }
+      driving = false;
+      joystick.dataset.active = "false";
+      recenterKnob();
+      sendDrive();   // one explicit stop; the watchdog is the backup
+    }
+
+    joystick.addEventListener("pointerup", endDrive);
+    joystick.addEventListener("pointercancel", endDrive);
+
+    // Keep streaming the stick position while driving so the rover's deadman
+    // watchdog stays fed (it stops on its own if these updates ever dry up).
+    setInterval(() => {
+      if (driving) {
+        sendDrive();
+      }
+    }, 100);
+
+    refreshStatus();
+    setInterval(refreshStatus, 1000);
+  </script>
+</body>
+</html>

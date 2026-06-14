@@ -8,6 +8,8 @@ glowing LED ring.
 
 > 🚀 **Start here:** [SETUP.md](SETUP.md) — set up VS Code + PlatformIO and upload
 > our first program. Code lives in [src/main.cpp](src/main.cpp).
+> The rover web page lives in [data/index.html](data/index.html); upload the
+> filesystem image when that file changes.
 
 ---
 
@@ -71,12 +73,12 @@ We'll build in small wins so Valentin sees progress every session:
 
 - [x] **1. Blink** — ✅ board boots & uploads, "Hello from VURP!" on Serial. (LED wiring next session.)
 - [x] **2. Light up** — ✅ NeoPixel ring runs a rotating rainbow (powered from 3V3, data on D2).
-- [ ] **3. WiFi page** — ESP32 serves a web page; a button on the phone turns the ring on/off. 👉 **next (Fri Jun 5)**
-- [ ] **4. One motor** — wire up the motor driver, spin one tread forward/back.
-- [ ] **5. Two motors** — both treads; drive forward, back, and turn.
-- [ ] **6. Joystick** — web page joystick → smooth driving from the phone.
-- [ ] **7. Screen** — wire the OLED onto the I²C bus; show the rover's WiFi IP + status.
-- [ ] **8. Sensors** — read the ToF distance; flash the ring red and stop when close to an obstacle.
+- [x] **3. WiFi page** — ✅ ESP32 serves a web page; a button on the phone turns the ring on/off.
+- [x] **4. Motor test** — ✅ spun the M3/M4 treads forward/back from the web page.
+- [x] **5. Two motors** — ✅ both treads: drive forward, back, and turn (spin in place).
+- [x] **6. Joystick** — ✅ on-screen touch joystick → smooth proportional driving from the phone.
+- [x] **7. Screen** — ✅ OLED on the shared I²C bus shows the WiFi name, IP, and live status.
+- [ ] **8. Sensors** — read the ToF distance; flash the ring red and stop when close to an obstacle. 👉 **next**
 - [ ] **9. Polish** — mount everything on the chassis, tidy wiring, name it, show it off.
 - [ ] **Stretch:** GPS logging outdoors; then the full Raspberry Pi + camera for FPV driving.
 
@@ -95,6 +97,8 @@ We'll build in small wins so Valentin sees progress every session:
 
 - ✅ **Chassis:** confirmed — tracked chassis with 2 DC motors on hand.
 - ✅ **FeatherWing wired:** the ~4 connection wires to the XIAO are soldered.
+- ✅ **I²C pins:** on the XIAO ESP32-C3, **SDA = D4 / GPIO6** and
+  **SCL = D5 / GPIO7**. The Motor FeatherWing uses address **0x60**.
 
 ## Decisions still open
 
@@ -115,3 +119,32 @@ We'll build in small wins so Valentin sees progress every session:
   (NeoPixel rainbow, powered from 3V3, data on D2). Confirmed we have the tracked
   chassis and the Motor FeatherWing wires are soldered. **Next session: Friday
   Jun 5 — Milestone 3 (WiFi control page).**
+- **2026-06-05** — ✅ **Milestone 3 done**: the XIAO ESP32-C3 creates the **VURP**
+  WiFi network and serves a phone-friendly page at **http://192.168.4.1/**. The
+  button turns the NeoPixel ring rainbow on/off.
+- **2026-06-05** — **Milestone 4 test firmware prepared**: added the Adafruit
+  Motor FeatherWing library and web buttons for **M3/M4 forward / stop / reverse**.
+  First tests use low speed and auto-stop after 1 second.
+- **2026-06-05** — Refactored the rover web controls: HTML moved to
+  **data/index.html**, and buttons now call tiny JSON API endpoints instead of
+  refreshing the whole page.
+- **2026-06-05** — Improved the motor test controls: added low/medium/max speed
+  buttons and a short full-power start boost so the tank treads can overcome
+  static friction more reliably.
+- **2026-06-05** — Replaced the main motor test buttons with a 4-way drive pad:
+  forward/back drive both treads, left/right spin in place by running M3 and M4
+  in opposite directions.
+- **2026-06-14** — ✅ **Milestones 4, 5 & 6 done**: motor test, two-tread driving,
+  and now a real **on-screen joystick** (`/api/drive`). The page sends a stick
+  vector and the firmware does the differential-drive mixing (`left = y + x`,
+  `right = y - x`) into proportional tread speeds. Added a **deadman watchdog**:
+  the rover stops itself if the phone stops sending updates (lock / out of range).
+  Built, uploaded (firmware + LittleFS), and tested on the rover — drives great.
+  **Next: Milestone 7 — wire the OLED onto the I²C bus and show IP + status.**
+- **2026-06-14** — ✅ **Milestone 7 done**: wired the **OLED** onto the shared I²C
+  bus (no soldering — piggybacks on SDA/SCL alongside the FeatherWing). Boot now
+  runs a full **I²C scan** that names each device; it found `0x3C` (OLED), `0x60`
+  + `0x70` (the FeatherWing's PCA9685, which also answers the "All Call" address).
+  The screen shows the WiFi name, IP, ring state, speed, and an `idle`/`moving`
+  state — and only redraws on change so it never stutters the joystick. Contrast
+  set to max for brightness. **Next: Milestone 8 — ToF obstacle sensor.**
