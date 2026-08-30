@@ -3,3 +3,24 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# macOS metadata
+.DS_Store
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Rhino / Grasshopper temporary and backup files
+*.3dmbak
+*.ghbak
+*.stlbak
+~$*
+
+# Generated CAD exports and diagnostic viewport captures
+cad/export/
+cad/*preview*.png
+cad/vurp_holder_*.png
+cad/vurp_rear_loading_holder*.png
